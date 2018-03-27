@@ -62,7 +62,7 @@ void ADC0_IRQHandler(void) {
  * @brief   Application entry point.
  */
 int main(void) {
-	uint32_t threshold = 800U;
+	uint32_t threshold = 3000U;
 
   	/* Init board hardware. */
     BOARD_InitBootPins();
@@ -81,13 +81,16 @@ int main(void) {
     ADC0->CFG1 = 0x40 | 0x10 | 0x04 | 0x00; // Software triggering on the ADC (12 bit encoding)
     ADC0->SC2 &= ~0x40;
 
-    while(1) {
-    	ADC0->SC1[0] = 0x48;
-    	while(!isConverted){}
-    	if(result >= threshold)
-    		printf("Value: %d \n", result);
-    	isConverted = 0;
+    ADC0->SC1[0] = 0x48;
 
+    while(1) {
+    	if(isConverted){
+    		if(result >= threshold){
+    			//printf("Value: %d \n", result);
+    		    printf("Knock detected \n");
+    		}
+    		isConverted = 0;
+    	}
     }
 
     return 0;
