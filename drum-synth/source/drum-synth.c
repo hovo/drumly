@@ -38,11 +38,13 @@
 #include "pin_mux.h"
 #include "clock_config.h"
 #include "MKL43Z4.h"
-#include "fsl_pit.h"
 /* TODO: insert other include files here. */
+#include "fsl_pit.h"
 
 #define mask 255
 #define STARTING_VALUE 1087
+
+volatile uint32_t sampleIndex = 0;
 
 static const int sin_table[256] = {
 		2048,2098,2148,2198,2248,2298,2348,2398,
@@ -79,7 +81,7 @@ static const int sin_table[256] = {
 		1648,1697,1747,1797,1847,1897,1947,1997
 };
 
-uint8_t getSinIndex(uint8_t sample) {
+uint8_t getSinIndex(uint32_t sample) {
 	uint8_t i = sample & mask;
 	return sin_table[i];
 }
@@ -92,7 +94,9 @@ void PIT_IRQHandler(void) {
 	if(PIT->CHANNEL[0].TFLG & PIT_TFLG_TIF_MASK){
 		// Clear interrupt request flag for channel 0
 		PIT->CHANNEL[0].TFLG &= PIT_TFLG_TIF_MASK;
-
+		// Increment the sample index
+		sampleIndex++;
+		/* TODO: Send sample at indexIndex to DAC */
 	}
 }
 
@@ -124,11 +128,10 @@ int main(void) {
 
     __enable_irq(); // Ensure interrupts are not masked globally
 
-    /* Force the counter to be placed into memory. */
-    volatile static int i = 0 ;
-    /* Enter an infinite loop, just incrementing a counter. */
+
+    /* Event Loop */
     while(1) {
-        i++ ;
+        /* TODO: */
     }
     return 0 ;
 }
