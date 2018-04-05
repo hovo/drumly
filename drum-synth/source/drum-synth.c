@@ -114,7 +114,16 @@ int main(void) {
   	/* Init FSL debug console. */
     BOARD_InitDebugConsole();
 
-    // PIT Configuration
+    /*------------------ DAC Configuration -------------------- */
+    SIM->SCGC5 |= SIM_SCGC5_PORTE_MASK; // PORTE clock gate control: Clock enabled
+    PORTE->PCR[30] = 0x000; // Set POERT to DAC0_OUT
+
+    SIM->SCGC6 |= SIM_SCGC6_DAC0_MASK; // DAC0 Clock Gate Control: Clock enabled
+    DAC0->C0 |= DAC_C0_DACRFS_MASK; // Vref2
+    DAC0->C0 |= DAC_C0_DACEN_MASK; // Enable the DAC module
+    DAC0->C2 = (DAC0->C2 & ~DAC_C2_DACBFRP_MASK) | DAC_C2_DACBFRP(0U); // Make sure the read pointer to the start.
+
+    /*------------------ PIT Configuration -------------------- */
     SIM->SCGC6 |= SIM_SCGC6_PIT_MASK; // PIT Clock Gate Control: Clock Enabled
     PIT->MCR &= ~PIT_MCR_MDIS_MASK; // Enable module
     PIT->MCR |= PIT_MCR_FRZ_MASK; // Freeze timers in debug mode
@@ -122,7 +131,7 @@ int main(void) {
     PIT->CHANNEL[0].TCTRL &= PIT_TCTRL_CHN_MASK; // No chaining of timers
     PIT->CHANNEL[0].TCTRL |= PIT_TCTRL_TIE_MASK; // Timer Interrupt Enable: Interrupt will be requested whenever TIF is set
 
-    // NVIC Configuration
+    /*------------------ NVIC Configuration -------------------- */
     NVIC_SetPriority(PIT_IRQn, 128); // Set PIT IRQ priority
     NVIC_ClearPendingIRQ(PIT_IRQn); // Clear any pending IRQ from PIT
     NVIC_EnableIRQ(PIT_IRQn);
