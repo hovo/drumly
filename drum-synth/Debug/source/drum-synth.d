@@ -17,7 +17,8 @@ source/drum-synth.o source/drum-synth.d: ../source/drum-synth.c \
  /Users/hovo/Desktop/drum/drum-synth/board/pin_mux.h \
  /Users/hovo/Desktop/drum/drum-synth/board/clock_config.h \
  /Users/hovo/Desktop/drum/drum-synth/CMSIS/MKL43Z4.h \
- /Users/hovo/Desktop/drum/drum-synth/drivers/fsl_pit.h
+ /Users/hovo/Desktop/drum/drum-synth/drivers/fsl_pit.h \
+ /Users/hovo/Desktop/drum/drum-synth/drivers/fsl_dac.h
 
 /Users/hovo/Desktop/drum/drum-synth/board/board.h:
 
@@ -56,3 +57,5 @@ source/drum-synth.o source/drum-synth.d: ../source/drum-synth.c \
 /Users/hovo/Desktop/drum/drum-synth/CMSIS/MKL43Z4.h:
 
 /Users/hovo/Desktop/drum/drum-synth/drivers/fsl_pit.h:
+
+/Users/hovo/Desktop/drum/drum-synth/drivers/fsl_dac.h:
