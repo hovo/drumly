@@ -50,7 +50,7 @@ volatile uint32_t sampleIndex = 0;
 /*
  * 256-Point Sine Lookup table for 1 cycle
  */
-static const int sin_table[256] = {
+static const uint16_t sin_table[256] = {
 		2048,2098,2148,2198,2248,2298,2348,2398,
 		2447,2496,2545,2594,2642,2690,2737,2784,
 		2831,2877,2923,2968,3013,3057,3100,3143,
@@ -90,7 +90,7 @@ static const int sin_table[256] = {
  * @param sample index 0-44100
  * @return value from sine LUT
  */
-uint8_t getSinIndex(uint32_t sample) {
+uint8_t getSinIndex(uint16_t sample) {
 	uint8_t i = sample & mask;
 	return sin_table[i];
 }
@@ -109,6 +109,8 @@ void PIT_IRQHandler(void) {
 		// Increment the sample index
 		sampleIndex++;
 		/* TODO: Send sample at indexIndex to DAC */
+		uint16_t sineValue = getSinIndex(sampleIndex);
+		DAC_SetBufferValue(DAC0, 0U, sineValue);
 	}
 	PIT_ClearStatusFlags(PIT, kPIT_Chnl_0, kPIT_TimerFlag);
 }
