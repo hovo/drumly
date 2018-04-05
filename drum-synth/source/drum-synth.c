@@ -41,6 +41,7 @@
 /* TODO: insert other include files here. */
 
 /* TODO: insert other definitions and declarations here. */
+#define mask = 255;
 
 static const int sin_table[256] = {
 		2048,2098,2148,2198,2248,2298,2348,2398,
@@ -76,6 +77,12 @@ static const int sin_table[256] = {
 		1264,1311,1358,1405,1453,1501,1550,1599,
 		1648,1697,1747,1797,1847,1897,1947,1997
 };
+
+uint8_t getSinIndex(uint8_t sample) {
+	uint8_t i = sample & mask;
+	return sin_table[i];
+}
+
 
 /*
  * @brief   Application entry point.
