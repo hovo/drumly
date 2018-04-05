@@ -43,6 +43,7 @@
 
 #define mask 255
 #define STARTING_VALUE 1087
+#define SAMPLING_FREQUENCY 44100
 
 volatile uint32_t sampleIndex = 0;
 
@@ -89,15 +90,21 @@ uint8_t getSinIndex(uint32_t sample) {
 void PIT_IRQHandler(void) {
 	// Clear pending IRQ
 	NVIC_ClearPendingIRQ(PIT_IRQn);
-	PIT_ClearStatusFlags(PIT, kPIT_Chnl_0, kPIT_TimerFlag);
 
 	if(PIT->CHANNEL[0].TFLG & PIT_TFLG_TIF_MASK){
 		// Clear interrupt request flag for channel 0
 		PIT->CHANNEL[0].TFLG &= PIT_TFLG_TIF_MASK;
+		// Reset sample index
+		if(sampleIndex == SAMPLING_FREQUENCY){
+			sampleIndex = 0;
+		}
+
 		// Increment the sample index
 		sampleIndex++;
+
 		/* TODO: Send sample at indexIndex to DAC */
 	}
+	PIT_ClearStatusFlags(PIT, kPIT_Chnl_0, kPIT_TimerFlag);
 }
 
 
@@ -128,10 +135,14 @@ int main(void) {
 
     __enable_irq(); // Ensure interrupts are not masked globally
 
+    PIT->CHANNEL[0].TCTRL |= PIT_TCTRL_TEN_MASK; // Start the timer channel
+    // PIT->CHANNEL[0].TCTRL &= ~PIT_TCTRL_TEN_MASK;
+
 
     /* Event Loop */
     while(1) {
         /* TODO: */
+
     }
     return 0 ;
 }
