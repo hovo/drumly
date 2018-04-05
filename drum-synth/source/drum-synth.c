@@ -41,7 +41,8 @@
 /* TODO: insert other include files here. */
 
 /* TODO: insert other definitions and declarations here. */
-#define mask = 255;
+#define mask 255
+#define STARTING_VALUE 1087
 
 static const int sin_table[256] = {
 		2048,2098,2148,2198,2248,2298,2348,2398,
@@ -96,7 +97,12 @@ int main(void) {
   	/* Init FSL debug console. */
     BOARD_InitDebugConsole();
 
-    printf("Hello World\n");
+    // PIT Configuration
+    SIM->SCGC6 |= SIM_SCGC6_PIT_MASK; // PIT Clock Gate Control: Clock Enabled
+    PIT->MCR &= ~PIT_MCR_MDIS_MASK; // Enable module
+    PIT->MCR |= PIT_MCR_FRZ_MASK; // Freeze timers in debug mode
+    PIT->CHANNEL[0].LDVAL = PIT_LDVAL_TSV(STARTING_VALUE); // Initialize PIT0 to count down from STARTING_VALUE
+    PIT->CHANNEL[0].TCTRL &= PIT_TCTRL_CHN_MASK; // No chaining of timers
 
     /* Force the counter to be placed into memory. */
     volatile static int i = 0 ;
