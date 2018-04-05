@@ -103,6 +103,14 @@ int main(void) {
     PIT->MCR |= PIT_MCR_FRZ_MASK; // Freeze timers in debug mode
     PIT->CHANNEL[0].LDVAL = PIT_LDVAL_TSV(STARTING_VALUE); // Initialize PIT0 to count down from STARTING_VALUE
     PIT->CHANNEL[0].TCTRL &= PIT_TCTRL_CHN_MASK; // No chaining of timers
+    PIT->CHANNEL[0].TCTRL |= PIT_TCTRL_TIE_MASK; // Timer Interrupt Enable: Interrupt will be requested whenever TIF is set
+
+    // NVIC Configuration
+    NVIC_SetPriority(PIT_IRQn, 128); // Set PIT IRQ priority
+    NVIC_ClearPendingIRQ(PIT_IRQn); // Clear any pending IRQ from PIT
+    NVIC_EnableIRQ(PIT_IRQn);
+
+    __enable_irq(); // Ensure interrupts are not masked globally
 
     /* Force the counter to be placed into memory. */
     volatile static int i = 0 ;
