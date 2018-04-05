@@ -38,9 +38,9 @@
 #include "pin_mux.h"
 #include "clock_config.h"
 #include "MKL43Z4.h"
+#include "fsl_pit.h"
 /* TODO: insert other include files here. */
 
-/* TODO: insert other definitions and declarations here. */
 #define mask 255
 #define STARTING_VALUE 1087
 
@@ -82,6 +82,18 @@ static const int sin_table[256] = {
 uint8_t getSinIndex(uint8_t sample) {
 	uint8_t i = sample & mask;
 	return sin_table[i];
+}
+
+void PIT_IRQHandler(void) {
+	// Clear pending IRQ
+	NVIC_ClearPendingIRQ(PIT_IRQn);
+	PIT_ClearStatusFlags(PIT, kPIT_Chnl_0, kPIT_TimerFlag);
+
+	if(PIT->CHANNEL[0].TFLG & PIT_TFLG_TIF_MASK){
+		// Clear interrupt request flag for channel 0
+		PIT->CHANNEL[0].TFLG &= PIT_TFLG_TIF_MASK;
+
+	}
 }
 
 
