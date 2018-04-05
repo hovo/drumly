@@ -42,7 +42,7 @@
 #include "fsl_pit.h"
 
 #define mask 255
-#define STARTING_VALUE 1087
+#define STARTING_VALUE 543
 #define SAMPLING_FREQUENCY 44100
 
 volatile uint32_t sampleIndex = 0;
@@ -94,14 +94,8 @@ void PIT_IRQHandler(void) {
 	if(PIT->CHANNEL[0].TFLG & PIT_TFLG_TIF_MASK){
 		// Clear interrupt request flag for channel 0
 		PIT->CHANNEL[0].TFLG &= PIT_TFLG_TIF_MASK;
-		// Reset sample index
-		if(sampleIndex == SAMPLING_FREQUENCY){
-			sampleIndex = 0;
-		}
-
 		// Increment the sample index
 		sampleIndex++;
-
 		/* TODO: Send sample at indexIndex to DAC */
 	}
 	PIT_ClearStatusFlags(PIT, kPIT_Chnl_0, kPIT_TimerFlag);
@@ -141,8 +135,11 @@ int main(void) {
 
     /* Event Loop */
     while(1) {
-        /* TODO: */
-
+		// Reset sample index
+		if(sampleIndex == SAMPLING_FREQUENCY){
+			printf("44100 samples reached\n");
+			sampleIndex = 0;
+		}
     }
     return 0 ;
 }
