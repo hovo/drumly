@@ -178,25 +178,21 @@ int main(void) {
     NVIC_ClearPendingIRQ(PIT_IRQn); // Clear any pending IRQ from PIT
     NVIC_EnableIRQ(PIT_IRQn);
     NVIC_EnableIRQ(ADC0_IRQn);
-
     __enable_irq(); // Ensure interrupts are not masked globally
-
-    // PIT->CHANNEL[0].TCTRL &= ~PIT_TCTRL_TEN_MASK;
 
     ADC0->SC1[0] = 0x48;
     /* Event Loop */
     while(1) {
     	// Reset sample index
     	if(sampleIndex == SAMPLING_FREQUENCY){
-    		printf("44100 samples reached\n");
+    		//printf("44100 samples reached\n");
     		sampleIndex = 0;
-    		//PIT->CHANNEL[0].TCTRL &= ~PIT_TCTRL_TEN_MASK;
+    		PIT->CHANNEL[0].TCTRL &= ~PIT_TCTRL_TEN_MASK; // Stop channel 0 timer
     	}
     	if(adcConverted){
     		if(adcResult >= KNOCK_THRESHOLD){
-    			// printf("Knock Detected\n");
-
-    		    PIT->CHANNEL[0].TCTRL |= PIT_TCTRL_TEN_MASK; // Start the timer channel
+    			printf("Knock Detected\n");
+    		    PIT->CHANNEL[0].TCTRL |= PIT_TCTRL_TEN_MASK; // Start channel 0 timer
     		}
     	}
     }
