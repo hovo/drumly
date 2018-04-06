@@ -5,7 +5,11 @@ Synthesize drum beat upon trigger from piezo sensor.
 2. Audio amplifier [http://www.ti.com/lit/ds/symlink/lm386.pdf](LM386N-4)
 3. [https://os.mbed.com/platforms/FRDM-KL43Z/](FRDM-KL43Z)
 4. Electrolytic capacitors of values {0.1uF, 100uF, 220uF}
-5. 5 kOhm resistor
+5. Resistors {5kohm, 1Mohm}
+6. Piezoelectric sensor (35mm diameter)
+7. Jumper canbles/wires
+8. Breadboard (medium size would do) 
+9. 9v DC voltage source
 
 ## Circuit Diagram
 ![](circuit.jpg)
