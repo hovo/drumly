@@ -13,3 +13,6 @@ Synthesize drum beat upon trigger from piezo sensor.
 * Attach additinal sensors for variety
 * Synthesize drum beat for snare using few harmonics
 * Periodically interrupt for ADC readings - PIT
+## Acknowledgement
+http://www.daycounter.com/Calculators/Sine-Generator-Calculator.phtml
+
