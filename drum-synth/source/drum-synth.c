@@ -44,8 +44,11 @@
 #define mask 255
 #define CH_0_STARTING_VALUE 543U
 #define SAMPLING_FREQUENCY 44100
+#define KNOCK_THRESHOLD 3000U
 
 volatile uint32_t sampleIndex = 0;
+volatile bool adcConverted = 0;
+volatile uint32_t adcResult = 0;
 
 /*
  * 256-Point Sine Lookup table for 1 cycle
@@ -96,6 +99,14 @@ uint8_t getSinIndex(uint16_t sample) {
 }
 
 /*
+ * Write digital data to the DAC buffer: DATA High and Low registers
+ */
+void setBufferValue(uint16_t value) {
+	DAC0->DAT[0U].DATL = (uint8_t)(0xFFU & value); // Low 8-bit
+	DAC0->DAT[0U].DATH = (uint8_t)((0xF00U & value) >> 8); // High 4-bit
+}
+
+/*
  * Interrupt handler for PIT (Periodic Interrupt Timer)
  * Responsible of streaming data to the DAC module
  */
@@ -109,10 +120,27 @@ void PIT_IRQHandler(void) {
 		// Increment the sample index
 		sampleIndex++;
 		uint16_t sineValue = getSinIndex(sampleIndex);
-		DAC_SetBufferValue(DAC0, 0U, sineValue);
+		setBufferValue(sineValue);
 	}
 
 	PIT_ClearStatusFlags(PIT, kPIT_Chnl_0, kPIT_TimerFlag);
+}
+
+/*
+ * Interrupt handler for ADC (Analog to Digital)
+ * Responsible for setting the conversion complete flag &
+ * storing the actual result in a global variable
+ */
+void ADC0_IRQHandler(void) {
+	NVIC_ClearPendingIRQ(ADC0_IRQn);
+	ADC0->SC1[0] = 0x48;
+
+	adcConverted = 1;
+	adcResult = ADC0->R[0];
+
+#if defined __CORTEX_M && (__CORTEX_M == 4U)
+    __DSB();
+#endif
 }
 
 /*
@@ -158,21 +186,23 @@ int main(void) {
     NVIC_ClearPendingIRQ(PIT_IRQn); // Clear any pending IRQ from PIT
     NVIC_EnableIRQ(PIT_IRQn);
     NVIC_EnableIRQ(ADC0_IRQn);
-
     __enable_irq(); // Ensure interrupts are not masked globally
 
-    PIT->CHANNEL[0].TCTRL |= PIT_TCTRL_TEN_MASK; // Start the timer channel
-    // PIT->CHANNEL[0].TCTRL &= ~PIT_TCTRL_TEN_MASK;
-
     ADC0->SC1[0] = 0x48;
+    PIT->CHANNEL[0].TCTRL |= PIT_TCTRL_TEN_MASK; // Start channel 0 timer
     /* Event Loop */
     while(1) {
-		// Reset sample index
-		if(sampleIndex == SAMPLING_FREQUENCY){
-			printf("44100 samples reached\n");
-			sampleIndex = 0;
-			//PIT->CHANNEL[0].TCTRL &= ~PIT_TCTRL_TEN_MASK;
-		}
+    	// Reset sample index
+    	if(sampleIndex == SAMPLING_FREQUENCY){
+    		sampleIndex = 0;
+    		PIT->CHANNEL[0].TCTRL &= ~PIT_TCTRL_TEN_MASK; // Stop channel 0 timer
+    	}
+    	if(adcConverted){
+    		if(adcResult >= KNOCK_THRESHOLD){
+    			printf("Knock Detected\n");
+    		    PIT->CHANNEL[0].TCTRL |= PIT_TCTRL_TEN_MASK; // Start channel 0 timer
+    		}
+    	}
     }
     return 0 ;
 }
