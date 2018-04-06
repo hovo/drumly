@@ -127,6 +127,15 @@ int main(void) {
   	/* Init FSL debug console. */
     BOARD_InitDebugConsole();
 
+    /*------------------ ADC Configuration -------------------- */
+    SIM->SCGC5 |= SIM_SCGC5_PORTB_MASK; // PORTB clock gate control: Clock enabled
+    PORTB->PCR[0] =  0x000; // Alt0 (default mode)
+
+    SIM->SCGC6 |= SIM_SCGC6_ADC0_MASK; // Enable the DAC module
+    ADC0->CFG1 = 0x40 | 0x10 | 0x04 | 0x00; // Software triggering on the ADC (12 bit encoding)
+    ADC0->SC2 &= ~0x40;
+    ADC0->SC2 |= 0b00000001; // Enable Vref2 3.3v
+
     /*------------------ DAC Configuration -------------------- */
     SIM->SCGC5 |= SIM_SCGC5_PORTE_MASK; // PORTE clock gate control: Clock enabled
     PORTE->PCR[30] = 0x000; // Set POERT to DAC0_OUT
@@ -148,12 +157,14 @@ int main(void) {
     NVIC_SetPriority(PIT_IRQn, 128); // Set PIT IRQ priority
     NVIC_ClearPendingIRQ(PIT_IRQn); // Clear any pending IRQ from PIT
     NVIC_EnableIRQ(PIT_IRQn);
+    NVIC_EnableIRQ(ADC0_IRQn);
 
     __enable_irq(); // Ensure interrupts are not masked globally
 
     PIT->CHANNEL[0].TCTRL |= PIT_TCTRL_TEN_MASK; // Start the timer channel
     // PIT->CHANNEL[0].TCTRL &= ~PIT_TCTRL_TEN_MASK;
 
+    ADC0->SC1[0] = 0x48;
     /* Event Loop */
     while(1) {
 		// Reset sample index
